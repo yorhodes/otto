@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	// "github.com/dlclark/regexp2"
 	"github.com/robertkrimen/otto"
 	"github.com/robertkrimen/otto/underscore"
 )
@@ -20,6 +21,17 @@ func readSource(filename string) ([]byte, error) {
 }
 
 func main() {
+	// regularExpression2, err2 := regexp2.Compile("a(?!b)", 0x0100)
+	// if err2 != nil {
+	// 	fmt.Printf(err2.Error())
+	// }
+	// res, _ := regularExpression2.MatchString("ac")
+	// if res {
+	// 	fmt.Printf("match!!!\n")
+	// } else {
+	// 	fmt.Printf("no match\n")
+	// }
+
 	flag.Parse()
 
 	if !*flag_underscore {
