@@ -54,7 +54,7 @@ func (runtime *_runtime) newRegExpObject(pattern string, flags string) *_object 
 
 	re2pattern, err := parser.TransformRegExp(pattern)
 	if err != nil {
-		panic(runtime.panicTypeError("Invalid regular expression: %s", err.Error()))
+		// panic(runtime.panicTypeError("Invalid regular expression: %s", err.Error()))
 	}
 	if len(re2flags) > 0 {
 		re2pattern = fmt.Sprintf("(?%s:%s)", re2flags, re2pattern)
@@ -68,7 +68,7 @@ func (runtime *_runtime) newRegExpObject(pattern string, flags string) *_object 
 
 	regularExpression, err := regexp.Compile(pattern)
 	if err != nil {
-		panic(runtime.panicTypeError("[1] Invalid regular expression: %s", err.Error()))
+		// panic(runtime.panicTypeError("[1] Invalid regular expression: %s", err.Error()))
 	}
 	if len(re2flags) > 0 {
 		re2pattern = fmt.Sprintf("(?%s:%s)", re2flags, re2pattern)

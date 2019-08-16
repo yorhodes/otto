@@ -177,7 +177,7 @@ func builtinString_match(call FunctionCall) Value {
 		fmt.Printf("last index2 %s\n", toValue_int(capture.Index + capture.Length))
 		fmt.Printf("value array2 %s\n", valueArray2)
 		
-		return toValue_object(call.runtime.newArrayOf(valueArray))
+		return toValue_object(call.runtime.newArrayOf(valueArray2))
 	}
 }
 
@@ -309,7 +309,7 @@ func builtinString_search(call FunctionCall) Value {
 	result2 := match.Groups()[0].Captures[0].Index
 	fmt.Printf("result %s\n", result[0])
 	fmt.Printf("result2 %s\n", result2)
-	return toValue_int(result[0])
+	return toValue_int(result2)
 }
 
 func stringSplitMatch(target string, targetLength int64, index uint, search string, searchLength int64) (bool, uint) {
