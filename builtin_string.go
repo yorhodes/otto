@@ -1,11 +1,14 @@
 package otto
 
 import (
+	"fmt"
 	"bytes"
 	"regexp"
 	"strconv"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/dlclark/regexp2"
 )
 
 // String
@@ -149,6 +152,31 @@ func builtinString_match(call FunctionCall) Value {
 			valueArray[index] = toValue_string(target[result[index][0]:result[index][1]])
 		}
 		matcher.put("lastIndex", toValue_int(result[matchCount-1][1]), true)
+		fmt.Printf("last index %s\n", toValue_int(result[matchCount-1][1]))
+		fmt.Printf("value array %s\n", valueArray)
+
+		var matches []*regexp2.Match
+		match, _ := matcher.regExpValue().regularExpression2.FindStringMatch(target)
+		for match != nil {
+			matches = append(matches, match)
+			match, _ = matcher.regExpValue().regularExpression2.FindNextMatch(match)
+		}
+		
+		lenm := len(matches)
+		if lenm == 0 {
+			matcher.put("lastIndex", toValue_int(0), true)
+			return Value{} // !match
+		}
+
+		valueArray2 := make([]Value, lenm)
+		for index := 0; index < lenm; index++ {
+			valueArray2[index] = toValue_string(matches[index].Groups()[0].Captures[0].String())
+		}
+		capture := matches[lenm-1].Groups()[0].Captures[0]
+		// matcher.put("lastIndex", toValue_int(capture.Index + capture.Length), true)
+		fmt.Printf("last index2 %s\n", toValue_int(capture.Index + capture.Length))
+		fmt.Printf("value array2 %s\n", valueArray2)
+		
 		return toValue_object(call.runtime.newArrayOf(valueArray))
 	}
 }
@@ -274,6 +302,13 @@ func builtinString_search(call FunctionCall) Value {
 	if result == nil {
 		return toValue_int(-1)
 	}
+	match, err := search.regExpValue().regularExpression2.FindStringMatch(target)
+	if err != nil {
+		fmt.Printf("f")
+	}
+	result2 := match.Groups()[0].Captures[0].Index
+	fmt.Printf("result %s\n", result[0])
+	fmt.Printf("result2 %s\n", result2)
 	return toValue_int(result[0])
 }
 

@@ -6,10 +6,12 @@ import (
 	"unicode/utf8"
 
 	"github.com/robertkrimen/otto/parser"
+	"github.com/dlclark/regexp2"
 )
 
 type _regExpObject struct {
 	regularExpression *regexp.Regexp
+	regularExpression2 *regexp2.Regexp
 	global            bool
 	ignoreCase        bool
 	multiline         bool
@@ -58,13 +60,28 @@ func (runtime *_runtime) newRegExpObject(pattern string, flags string) *_object 
 		re2pattern = fmt.Sprintf("(?%s:%s)", re2flags, re2pattern)
 	}
 
-	regularExpression, err := regexp.Compile(re2pattern)
+	// fmt.Printf("--------\n")
+	// fmt.Printf("%s\n", re2pattern)
+	// fmt.Printf("%s\n", re2flags)
+	// fmt.Printf("%s\n", pattern)
+	// fmt.Printf("%s\n", flags)
+
+	regularExpression, err := regexp.Compile(pattern)
 	if err != nil {
-		panic(runtime.panicSyntaxError("Invalid regular expression: %s", err.Error()[22:]))
+		panic(runtime.panicTypeError("[1] Invalid regular expression: %s", err.Error()))
+	}
+	if len(re2flags) > 0 {
+		re2pattern = fmt.Sprintf("(?%s:%s)", re2flags, re2pattern)
+	}
+	
+	regularExpression2, err := regexp2.Compile(pattern, 0x0100)
+	if err != nil {
+		panic(runtime.panicSyntaxError("[2] Invalid regular expression: %s", err.Error()[22:]))
 	}
 
 	self.value = _regExpObject{
 		regularExpression: regularExpression,
+		regularExpression2: regularExpression2,
 		global:            global,
 		ignoreCase:        ignoreCase,
 		multiline:         multiline,
@@ -96,7 +113,23 @@ func execRegExp(this *_object, target string) (match bool, result []int) {
 	}
 	if 0 > index || index > int64(len(target)) {
 	} else {
+		match_, err := this.regExpValue().regularExpression2.FindStringMatch(target[index:])
+		if err != nil {
+			fmt.Printf("bad news")
+		}
+		groups := match_.Groups()
+		var result2 []int
+		leng := len(groups)
+		result2 = make([]int, 2*leng)
+		for i := 0; i < leng; i++ {
+			result2[2*i] = groups[i].Index
+			result2[2*i+1] = groups[i].Index + groups[i].Length
+		}
+
 		result = this.regExpValue().regularExpression.FindStringSubmatchIndex(target[index:])
+		fmt.Printf("compare regex results\n")
+		fmt.Printf("result: %s\n", result)
+		fmt.Printf("result2: %s\n", result2)
 	}
 	if result == nil {
 		//this.defineProperty("lastIndex", toValue_(0), 0111, true)
